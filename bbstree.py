@@ -67,7 +67,7 @@ class BalancedBinarySearchTree:
     def remove(self, value):
         node = self.__get(self.__create_node(value), self.root)
         if not(node.left_son is None or node.right_son is None):
-            successor = BalancedBinarySearchTree.min(node.right_son)
+            successor = BalancedBinarySearchTree.__min_node(node.right_son)
             node.value = successor.value
             node = successor
 
@@ -105,12 +105,16 @@ class BalancedBinarySearchTree:
                     node.parent.right_son = None
                 self.__balance_tree_after_deletion(node.parent)
 
+    def min(self):
+        min_node = BalancedBinarySearchTree.__min_node(self.root)
+        return None if min_node is None else min_node.value
+
     @staticmethod
-    def min(root):
+    def __min_node(root):
         if root is None or root.left_son is None:
             return root
         else:
-            return BalancedBinarySearchTree.min(root.left_son)
+            return BalancedBinarySearchTree.__min_node(root.left_son)
 
     def __insert(self, node, new_node):
         if new_node.lesser_than(node):

@@ -14,8 +14,8 @@ class Precision:
 
 class Point:
     def __init__(self, x, y):
-        self.x = int(x)
-        self.y = int(y)
+        self.x = float(x)
+        self.y = float(y)
 
     def __repr__(self):
         return repr((self.x, self.y))
@@ -145,20 +145,21 @@ def build_initial_tree(segments, sorted_extremes):
 # Scan line algorithm
 def scan_line_radar(segments, extremes):
     sorted_extremes = sorted(extremes, cmp=compare_polar_angles)
-    scan_line_segments = build_initial_tree(segments, sorted_extremes)
+    scan_line = build_initial_tree(segments, sorted_extremes)
 
     is_visible_segment = [False for each_element in segments]
-    visible = LineSegmentBalancedTree.min(scan_line_segments.root).value
-    is_visible_segment[visible.index] = True
+    visible = scan_line.min()
+    if not (visible is None):
+        is_visible_segment[visible.index] = True
 
     for point in sorted_extremes:
         if point.is_left_extreme:
-            scan_line_segments.insert(segments[point.index])
+            scan_line.insert(segments[point.index])
         else:
-            scan_line_segments.remove(segments[point.index])
-        min_node = LineSegmentBalancedTree.min(scan_line_segments.root)
-        if not (min_node is None):
-            is_visible_segment[min_node.value.index] = True
+            scan_line.remove(segments[point.index])
+        visible = scan_line.min()
+        if not (visible is None):
+            is_visible_segment[visible.index] = True
 
     return [ segments[index] for index, present in
             enumerate(is_visible_segment) if present ]
