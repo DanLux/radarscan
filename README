@@ -1,0 +1,30 @@
+######################################################################
+Authors:
+
+Daniel Paulino Alves
+Felipe Yamaguti
+######################################################################
+
+
+This is the README file for the radar scan program. The purpose of this
+program is to, given a fixed guard position and a set of line segments,
+return the line segments visible from the guard.
+
+Entry:
+    The algorithm expects the guard's coordinates as the first entry.
+
+    It follows an arbitrary number of line segments, denoted by the two
+coordinates of it's ends. Each coordinate is given by 2 floating point
+numbers. To end input, hit control+D (sending EOF to standard input)
+
+Example:
+5 5
+
+0 0 0 10
+0 0 10 0
+0 10 10 10
+10 0 10 10
+
+There is still much to be done. We shall remove the simplifying hipothesis
+and add a graphical interface to the program.
+
