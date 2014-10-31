@@ -76,6 +76,13 @@ class LineSegment:
     def __repr__(self):
         return '[' + repr(self.left_extreme) + '; ' + repr(self.right_extreme) + ']'
 
+    def equals(self, segment):
+        p = self.left_extreme
+        q = self.right_extreme
+        r = segment.left_extreme
+        s = segment.right_extreme
+        return p.equals(r) and q.equals(s)
+
     def __set_segment(self, left_extreme, right_extreme):
         left_extreme.set_left_extreme(True)
         self.left_extreme = left_extreme
@@ -87,20 +94,28 @@ class LineSegment:
         LineSegment.origin = origin
 
 
+
 class LineSegmentBalancedTree(BalancedBinarySearchTree):
-    # FIXME colinear points
     @staticmethod
     def points_comparison_function(self, node):
+        if self.value.equals(node.value): return 0
         p = self.value.left_extreme
-        q = self.value.right_extreme
-        r = node.value.left_extreme
-        s = node.value.right_extreme
-        if p.equals(r) and q.equals(s):
-            return 0
-        elif p.on_the_left_side(r, s):
-            # self < node
-            return -1
-        else: return 1
+        q = node.value.left_extreme
+
+        # self and node are both in the scanline
+        if p.strictly_in_line_segment(LineSegment.origin, q):
+            return -1 # self < node
+        elif q.strictly_in_line_segment(LineSegment.origin, p):
+            return 1
+        else:
+            if q.on_the_left_side(LineSegment.origin, p):
+                if q.on_the_left_side(p, self.value.right_extreme):
+                    return 1
+                else: return -1
+            else:
+                if p.on_the_left_side(q, node.value.right_extreme):
+                    return -1
+                else: return 1
 
     def __init__(self):
         BalancedBinarySearchTree.__init__(self, LineSegmentBalancedTree.points_comparison_function)
