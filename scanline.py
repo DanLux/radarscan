@@ -2,14 +2,7 @@
 
 import sys
 from bbstree import BalancedBinarySearchTree
-
-#FIXME Is there another way?
-class Precision:
-    epsilon = 1e-100
-
-    @staticmethod
-    def is_zero(value):
-        return abs(value) <= Precision.epsilon
+from precision import FloatingPoint
 
 
 class Point:
@@ -27,8 +20,8 @@ class Point:
         self.index = index
 
     def equals(self, point):
-        return Precision.is_zero(self.x - point.x) and \
-                Precision.is_zero(self.y - point.y)
+        return FloatingPoint.is_zero(self.x - point.x) and \
+                FloatingPoint.is_zero(self.y - point.y)
 
     def relative_quadrant(self, origin):
         p = self.__translate(origin)
@@ -42,7 +35,7 @@ class Point:
                (point1.y - self.y) * (point2.x - self.x)
 
     def colinear(self, point1, point2):
-        return Precision.is_zero(self.area(point1, point2))
+        return FloatingPoint.is_zero(self.area(point1, point2))
 
     def on_the_left_side(self, left_extreme, right_extreme):
         return self.area(left_extreme, right_extreme) > 0
