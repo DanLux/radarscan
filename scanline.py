@@ -4,6 +4,7 @@ import sys
 from bbstree import BalancedBinarySearchTree
 from precision import FloatingPoint
 
+debug = False
 
 class Point:
     def __init__(self, x, y):
@@ -114,6 +115,45 @@ class LineSegmentBalancedTree(BalancedBinarySearchTree):
         BalancedBinarySearchTree.__init__(self, LineSegmentBalancedTree.points_comparison_function)
 
 
+class VisibleTip:
+    def __init__(self, eventType, point):
+        self.point = point
+        self.eventType = eventType
+        self.index = point.index
+
+    def __repr__(self):
+        if self.eventType == "start":
+            return "[" + str(self.point)    
+        else:
+            return str(self.point) + "]"
+
+
+class VisibleSegments:
+    def __init__(self, results):
+        self.results = results
+
+    def openVisibleInterval(self, point):
+        if debug: print "Opening visibility of segment " + str(point.index)
+        self.results[point.index].append(VisibleTip("start", point))
+
+    def closeVisibleInterval(self, point):
+        if debug: print "Closing visibility of segment " + str(point.index)
+        self.results[point.index].append(VisibleTip("end", point))
+
+    def __repr__(self):
+        res = ""
+        i = 0
+        for entry in self.results:
+            middle = ""
+            for tip in entry:
+                middle = middle + str(tip) + " ; "
+
+            res = res + str(i) + ": "
+            res = res + middle + '\n'
+            i = i + 1
+        return res
+
+
 
 def compare_polar_angles(point1, point2):
     origin = LineSegment.origin
@@ -133,7 +173,7 @@ def compare_polar_angles(point1, point2):
             else: return 1
         else:
             if point1.on_the_left_side(origin, point2): return 1
-            else: return -1
+            else: return -1 
 
 
 def build_initial_tree(segments, sorted_extremes):
@@ -147,7 +187,49 @@ def build_initial_tree(segments, sorted_extremes):
 
     tree = LineSegmentBalancedTree()
     for segment in initial_segments: tree.insert(segment)
+
     return tree
+
+
+def intersect(p1, p2, p3, p4):
+    x1 = p1.x
+    x2 = p2.x
+    x3 = p3.x
+    x4 = p4.x
+    y1 = p1.y
+    y2 = p2.y
+    y3 = p3.y
+    y4 = p4.y
+
+    q_x = ((((x1*y2) - (y1*x2))*(x3-x4)) - ((x1-x2)*((x3*y4) - (y3*x4))))/(((x1 - x2)*(y3 - y4)) - ((y1 - y2)*(x3 - x4)))
+    q_y = ((((x1*y2) - (y1*x2))*(y3-y4)) - ((y1-y2)*((x3*y4) - (y3*x4))))/(((x1 - x2)*(y3 - y4)) - ((y1 - y2)*(x3 - x4)))
+    return Point(q_x, q_y)
+
+
+# Determines the visibility of a segment based on the case.
+def determine_visibility(case, current, last, just_treated, results):
+    if last == None:
+        results.openVisibleInterval(current.left_extreme)
+        return
+    
+    if current == None:
+        results.closeVisibleInterval(last.right_extreme)
+        return
+
+    if current.index == just_treated:
+        if case == "insertion":
+            p = intersect(last.left_extreme, last.right_extreme, LineSegment.origin, current.left_extreme)
+            p.set_segment_index(last.index)
+            results.closeVisibleInterval(p)
+            results.openVisibleInterval(current.left_extreme)
+            return
+    else:
+        if (not current == last) and case == "remotion":
+            results.closeVisibleInterval(last.right_extreme)
+            p = intersect(current.left_extreme, current.right_extreme, LineSegment.origin, last.right_extreme)
+            p.set_segment_index(current.index)
+            results.openVisibleInterval(p)
+            return
 
 
 # Scan line algorithm
@@ -155,23 +237,51 @@ def scan_line_radar(segments, extremes):
     sorted_extremes = sorted(extremes, cmp=compare_polar_angles)
     scan_line = build_initial_tree(segments, sorted_extremes)
 
-    is_visible_segment = [False for each_element in segments]
-    visible = scan_line.min()
-    if not (visible is None):
-        is_visible_segment[visible.index] = True
+
+    results = [[] for each_element in segments]
+    result = VisibleSegments(results)
+    last_visible = None 
+
+    if debug: 
+        for p in sorted_extremes:
+            print p.index
+
+    initial_point = None
+    current_visible = scan_line.min()
+    if not (current_visible is None):
+        p_aux = Point(LineSegment.origin.x + 1, LineSegment.origin.y)
+        initial_point = intersect(current_visible.left_extreme, current_visible.right_extreme, LineSegment.origin, p_aux)
+        initial_point.set_segment_index(current_visible.index)
+        result.openVisibleInterval(initial_point)
+        last_visible = current_visible
 
     for point in sorted_extremes:
         if point.is_left_extreme:
             scan_line.insert(segments[point.index])
+            case = "insertion"
         else:
             scan_line.remove(segments[point.index])
-        visible = scan_line.min()
-        if not (visible is None):
-            is_visible_segment[visible.index] = True
+            case = "remotion"
 
-    return [ segments[index] for index, present in
-            enumerate(is_visible_segment) if present ]
+        current_visible = scan_line.min()
+        
+        if debug:
+            print "case: " + case
+            print "iteration point: " + str(point.index) + "        -      " + str(point)
+            print "current visible: ",
+            if current_visible: print str(current_visible.index)
+            else: print "None"
 
+        determine_visibility(case, current_visible, last_visible, point.index, result)
+
+        if debug: print "\n"
+
+        last_visible = current_visible
+
+    if not (initial_point is None):
+        result.closeVisibleInterval(initial_point)
+
+    return result
 
 
 # Main program
@@ -201,8 +311,7 @@ while len(entry) > 0:
     extremes.append(q)
 
 
-guarded_walls = scan_line_radar(segments, extremes)
 print 'Visible segments from',
 print guard
-for wall in guarded_walls:
-    print wall
+guarded_walls = scan_line_radar(segments, extremes)
+print "\n" + str(guarded_walls)
