@@ -1,6 +1,5 @@
-#FIXME Is there another more clever way?
 class FloatingPoint:
-    epsilon = 1e-1000
+    epsilon = 1e-100
 
     @staticmethod
     def is_zero(value):
