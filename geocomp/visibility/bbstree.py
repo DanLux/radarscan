@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # Generic BBST Node structure
 class Node:
     def __init__(self, value, relation_function):

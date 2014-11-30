@@ -25,4 +25,4 @@ Example:
 0 10 10 10
 10 0 10 10
 
-There is still much to be done. We shall remove the simplifying hypothesis and add a graphical interface to the program.
+We also have a graphical interface associated to the program, which presents an animation of how the answer is obtained by the algorithm.

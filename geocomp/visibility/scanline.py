@@ -4,13 +4,15 @@
 import sys
 from bbstree import BalancedBinarySearchTree
 from precision import FloatingPoint
+from graphic import GraphicAnimation
+from geocomp.common import point
+
 
 debug = False
 
-class Point:
+class Point(point.Point):
     def __init__(self, x, y):
-        self.x = float(x)
-        self.y = float(y)
+        point.Point.__init__(self, float(x), float(y))
 
     def __repr__(self):
         return repr((self.x, self.y))
@@ -263,33 +265,55 @@ def scan_line_radar(segments, extremes):
     return result
 
 
+def radar_scan(input_list):
+    guard = Point(input_list[0].x, input_list[0].y)
+    LineSegment.set_origin(guard)
+
+    extremes = []
+    segments = []
+    for each in input_list[1:]:
+        p = Point(each.init.x, each.init.y)
+        q = Point(each.to.x, each.to.y)
+
+        k = len(segments)
+        p.set_segment_index(k)
+        q.set_segment_index(k)
+        segments.append(LineSegment(p, q))
+        extremes.append(p)
+        extremes.append(q)
+
+    guarded_walls = scan_line_radar(segments, extremes).visible_segments
+    GraphicAnimation(LineSegment.origin, guarded_walls).draw_animation()
+
+
 # Main program
-entry = sys.stdin.read().split()
-if len(entry) % 4 != 2:
-    raise Exception('Invalid input')
+def main():
+    entry = sys.stdin.read().split()
+    if len(entry) % 4 != 2:
+        raise Exception('Invalid input')
 
-# Reading input
-guard = Point(entry.pop(0), entry.pop(0))
-LineSegment.set_origin(guard)
-extremes = []
-segments = []
-while len(entry) > 0:
-    x = entry.pop(0)
-    y = entry.pop(0)
-    p = Point(x, y)
+    # Reading input
+    guard = Point(entry.pop(0), entry.pop(0))
+    LineSegment.set_origin(guard)
+    extremes = []
+    segments = []
+    while len(entry) > 0:
+        x = entry.pop(0)
+        y = entry.pop(0)
+        p = Point(x, y)
 
-    x = entry.pop(0)
-    y = entry.pop(0)
-    q = Point(x, y)
+        x = entry.pop(0)
+        y = entry.pop(0)
+        q = Point(x, y)
 
-    k = len(segments)
-    p.set_segment_index(k)
-    q.set_segment_index(k)
-    segments.append(LineSegment(p, q))
-    extremes.append(p)
-    extremes.append(q)
+        k = len(segments)
+        p.set_segment_index(k)
+        q.set_segment_index(k)
+        segments.append(LineSegment(p, q))
+        extremes.append(p)
+        extremes.append(q)
 
 
-print 'Visible segments from', guard, '\n'
-guarded_walls = scan_line_radar(segments, extremes)
-print guarded_walls
+    print 'Visible segments from', guard, '\n'
+    guarded_walls = scan_line_radar(segments, extremes)
+    print guarded_walls
