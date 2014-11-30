@@ -6,6 +6,7 @@ geocomp/visibility/bbstree.pyc
 geocomp/visibility/precision.pyc
 geocomp/visibility/graphic.pyc
 geocomp/visibility/scanline.pyc
+geocomp/visibility/geometry.pyc
 
 geocomp/common/__init__.pyc
 geocomp/common/control.pyc
