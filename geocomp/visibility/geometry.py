@@ -24,7 +24,7 @@ class Point(point.Point):
 
     def relative_quadrant(self, origin):
         p = self.__translate(origin)
-        if p.x >= 0 and p.y >= 0: return 1
+        if p.x >= 0 and p.y > 0: return 1
         elif p.x <= 0 and p.y >= 0: return 2
         elif p.x <= 0 and p.y <= 0: return 3
         else: return 4
