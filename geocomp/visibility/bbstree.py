@@ -27,10 +27,10 @@ class Node:
         return left_height - right_height
 
     def lesser_than(self, node):
-        return self.total_order_relation(self, node) == -1
+        return self.total_order_relation(self.value, node.value) == -1
 
     def greater_than(self, node):
-        return self.total_order_relation(self, node) == 1
+        return self.total_order_relation(self.value, node.value) == 1
 
     def equal(self, node):
         return not(self.greater_than(node) or self.lesser_than(node))
