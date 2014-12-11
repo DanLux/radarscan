@@ -36,6 +36,9 @@ class Point(point.Point):
     def colinear(self, point1, point2):
         return FloatingPoint.is_zero(self.area(point1, point2))
 
+    def on_the_left_of(self, segment):
+        return self.on_the_left_side(segment.left_extreme, segment.right_extreme)
+
     def on_the_left_side(self, left_extreme, right_extreme):
         return self.area(left_extreme, right_extreme) > 0
 

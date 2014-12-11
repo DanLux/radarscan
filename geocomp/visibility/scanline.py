@@ -12,28 +12,32 @@ debug = False
 
 class LineSegmentBalancedTree(BalancedBinarySearchTree):
     @staticmethod
-    def points_comparison_function(self, node):
-        if self.value.equals(node.value): return 0
-        p = self.value.left_extreme
-        q = node.value.left_extreme
+    def comparison_function(p, q):
+        if p.equals(q): return 0 # p = q
 
-        # self and node are both in the scanline
-        if p.strictly_in_line_segment(LineSegment.origin, q):
-            return -1 # self < node
-        elif q.strictly_in_line_segment(LineSegment.origin, p):
-            return 1
+        # p and q are both segments in the scanline
+        if p.left_extreme.strictly_in_line_segment(
+                                LineSegment.origin, q.left_extreme):
+            return -1 # p < q
+        elif q.left_extreme.strictly_in_line_segment(
+                                LineSegment.origin, p.left_extreme):
+            return 1 # p > q
+
         else:
-            if q.on_the_left_side(LineSegment.origin, p):
-                if q.on_the_left_side(p, self.value.right_extreme):
-                    return 1
-                else: return -1
-            else:
-                if p.on_the_left_side(q, node.value.right_extreme):
-                    return -1
-                else: return 1
+            if q.left_extreme.on_the_left_side(LineSegment.origin, p.left_extreme):
+                # p was inserted in the tree before q
+                if q.left_extreme.on_the_left_of(p):
+                    return 1 # p > q
+                else: return -1 # p < q
+            else: # q was inserted in the tree before p
+                if p.left_extreme.on_the_left_of(q):
+                    return -1 # p < q
+                else: return 1 # p > q
+
 
     def __init__(self):
-        BalancedBinarySearchTree.__init__(self, LineSegmentBalancedTree.points_comparison_function)
+        BalancedBinarySearchTree.__init__(self, LineSegmentBalancedTree.comparison_function)
+
 
 
 class VisibleSegments:
